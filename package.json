@@ -1,0 +1,41 @@
+{
+  "name": "claude-connect-do",
+  "version": "1.0.1",
+  "description": "Run Claude Code against DigitalOcean Gradient AI — spins up a local LiteLLM proxy to bridge Claude Code's Anthropic API format to DO's OpenAI-compatible endpoint.",
+  "license": "MIT",
+  "homepage": "https://github.com/darkness0308/claude-connect-do",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/darkness0308/claude-connect-do.git"
+  },
+  "bugs": "https://github.com/darkness0308/claude-connect-do/issues",
+  "files": [
+    "README.md",
+    "LICENSE",
+    "bin/"
+  ],
+  "bin": {
+    "claude-connect-do": "bin/claude-connect-do.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "digitalocean",
+    "gradient-ai",
+    "litellm",
+    "ai",
+    "llm",
+    "cli",
+    "proxy",
+    "anthropic",
+    "openai"
+  ]
+}

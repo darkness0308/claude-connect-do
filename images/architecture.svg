@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="ab" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#3b82f6"/>
+    </marker>
+    <marker id="ag" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#94a3b8"/>
+    </marker>
+    <marker id="as" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="400" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+  <text x="450" y="33" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">claude-connect-do</text>
+  <text x="450" y="53" text-anchor="middle" font-size="13" fill="#64748b">Claude Code ↔ DigitalOcean Gradient AI · Local LiteLLM Proxy Bridge</text>
+  <line x1="20" y1="66" x2="880" y2="66" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- ═══════════════════════════ REQUEST FLOW ═══════════════════════════ -->
+  <text x="26" y="83" font-size="10" font-weight="600" fill="#94a3b8" letter-spacing="1.5">REQUEST FLOW</text>
+
+  <!-- Claude Code (purple) — x=20 w=210 -->
+  <rect x="20" y="91" width="210" height="100" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+  <rect x="20" y="91" width="210" height="30" rx="8" fill="#7c3aed"/>
+  <rect x="20" y="109" width="210" height="12" fill="#7c3aed"/>
+  <text x="125" y="113" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Claude Code CLI</text>
+  <text x="125" y="136" text-anchor="middle" font-size="11" fill="#4c1d95">@anthropic-ai/claude-code</text>
+  <text x="125" y="154" text-anchor="middle" font-size="10" fill="#6d28d9">ANTHROPIC_BASE_URL → proxy</text>
+  <text x="125" y="172" text-anchor="middle" font-size="10" fill="#7c3aed">Anthropic API consumer</text>
+
+  <!-- Arrow 1 (request →) -->
+  <line x1="230" y1="123" x2="328" y2="123" stroke="#3b82f6" stroke-width="2" marker-end="url(#ab)"/>
+  <text x="279" y="116" text-anchor="middle" font-size="9" fill="#3b82f6" font-weight="600">Anthropic fmt</text>
+  <!-- Arrow 1 (response ←, dashed) -->
+  <line x1="330" y1="149" x2="230" y2="149" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ag)"/>
+  <text x="280" y="162" text-anchor="middle" font-size="9" fill="#94a3b8">response</text>
+
+  <!-- LiteLLM Proxy (green) — x=330 w=248 -->
+  <rect x="330" y="91" width="248" height="100" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <rect x="330" y="91" width="248" height="30" rx="8" fill="#16a34a"/>
+  <rect x="330" y="109" width="248" height="12" fill="#16a34a"/>
+  <text x="454" y="113" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">LiteLLM Proxy</text>
+  <text x="454" y="136" text-anchor="middle" font-size="11" fill="#14532d">127.0.0.1 : 9119–9218 (auto port)</text>
+  <text x="454" y="154" text-anchor="middle" font-size="10" fill="#166534">Anthropic → OpenAI translation</text>
+  <text x="454" y="172" text-anchor="middle" font-size="10" fill="#16a34a">DO compatibility patches applied</text>
+
+  <!-- Arrow 2 (request →) -->
+  <line x1="578" y1="123" x2="648" y2="123" stroke="#3b82f6" stroke-width="2" marker-end="url(#ab)"/>
+  <text x="613" y="116" text-anchor="middle" font-size="9" fill="#3b82f6" font-weight="600">OpenAI fmt</text>
+  <!-- Arrow 2 (response ←, dashed) -->
+  <line x1="650" y1="149" x2="578" y2="149" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ag)"/>
+  <text x="614" y="162" text-anchor="middle" font-size="9" fill="#94a3b8">response</text>
+
+  <!-- DO Gradient AI (blue) — x=650 w=230 -->
+  <rect x="650" y="91" width="230" height="100" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <rect x="650" y="91" width="230" height="30" rx="8" fill="#2563eb"/>
+  <rect x="650" y="109" width="230" height="12" fill="#2563eb"/>
+  <text x="765" y="113" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">DO Gradient AI</text>
+  <text x="765" y="136" text-anchor="middle" font-size="11" fill="#1e3a8a">inference.do-ai.run</text>
+  <text x="765" y="154" text-anchor="middle" font-size="10" fill="#1d4ed8">OpenAI-compatible API</text>
+  <text x="765" y="172" text-anchor="middle" font-size="10" fill="#2563eb">Hosts Claude model family</text>
+
+  <line x1="20" y1="207" x2="880" y2="207" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- ═══════════════════════════ STARTUP SEQUENCE ═══════════════════════════ -->
+  <text x="26" y="224" font-size="10" font-weight="600" fill="#94a3b8" letter-spacing="1.5">STARTUP SEQUENCE (per session)</text>
+
+  <!-- Step boxes: 9 × 78px wide, 12px arrows — start at x=51 -->
+  <!-- Step 1 -->
+  <rect x="51"  y="233" width="78" height="68" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <circle cx="90"  cy="248" r="10" fill="#64748b"/>
+  <text x="90"  y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">1</text>
+  <text x="90"  y="271" text-anchor="middle" font-size="9" fill="#334155" font-weight="600">Load</text>
+  <text x="90"  y="283" text-anchor="middle" font-size="9" fill="#334155">API Key</text>
+  <text x="90"  y="295" text-anchor="middle" font-size="8" fill="#94a3b8">config.env</text>
+
+  <line x1="129" y1="267" x2="141" y2="267" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#as)"/>
+
+  <!-- Step 2 -->
+  <rect x="141" y="233" width="78" height="68" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <circle cx="180" cy="248" r="10" fill="#64748b"/>
+  <text x="180" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">2</text>
+  <text x="180" y="271" text-anchor="middle" font-size="9" fill="#334155" font-weight="600">Fetch</text>
+  <text x="180" y="283" text-anchor="middle" font-size="9" fill="#334155">Models</text>
+  <text x="180" y="295" text-anchor="middle" font-size="8" fill="#94a3b8">24h cache</text>
+
+  <line x1="219" y1="267" x2="231" y2="267" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#as)"/>
+
+  <!-- Step 3 -->
+  <rect x="231" y="233" width="78" height="68" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <circle cx="270" cy="248" r="10" fill="#64748b"/>
+  <text x="270" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">3</text>
+  <text x="270" y="271" text-anchor="middle" font-size="9" fill="#334155" font-weight="600">Build</text>
+  <text x="270" y="283" text-anchor="middle" font-size="9" fill="#334155">Config</text>
+  <text x="270" y="295" text-anchor="middle" font-size="8" fill="#94a3b8">LiteLLM yaml</text>
+
+  <line x1="309" y1="267" x2="321" y2="267" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#as)"/>
+
+  <!-- Step 4 -->
+  <rect x="321" y="233" width="78" height="68" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <circle cx="360" cy="248" r="10" fill="#64748b"/>
+  <text x="360" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">4</text>
+  <text x="360" y="271" text-anchor="middle" font-size="9" fill="#334155" font-weight="600">Pick</text>
+  <text x="360" y="283" text-anchor="middle" font-size="9" fill="#334155">Port</text>
+  <text x="360" y="295" text-anchor="middle" font-size="8" fill="#94a3b8">9119–9218</text>
+
+  <line x1="399" y1="267" x2="411" y2="267" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#as)"/>
+
+  <!-- Step 5 (highlighted green — LiteLLM start) -->
+  <rect x="411" y="233" width="78" height="68" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+  <circle cx="450" cy="248" r="10" fill="#16a34a"/>
+  <text x="450" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">5</text>
+  <text x="450" y="271" text-anchor="middle" font-size="9" fill="#14532d" font-weight="600">Start</text>
+  <text x="450" y="283" text-anchor="middle" font-size="9" fill="#14532d">Proxy</text>
+  <text x="450" y="295" text-anchor="middle" font-size="8" fill="#16a34a">LiteLLM</text>
+
+  <line x1="489" y1="267" x2="501" y2="267" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#as)"/>
+
+  <!-- Step 6 -->
+  <rect x="501" y="233" width="78" height="68" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <circle cx="540" cy="248" r="10" fill="#64748b"/>
+  <text x="540" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">6</text>
+  <text x="540" y="271" text-anchor="middle" font-size="9" fill="#334155" font-weight="600">Health</text>
+  <text x="540" y="283" text-anchor="middle" font-size="9" fill="#334155">Check</text>
+  <text x="540" y="295" text-anchor="middle" font-size="8" fill="#94a3b8">retry 30s</text>
+
+  <line x1="579" y1="267" x2="591" y2="267" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#as)"/>
+
+  <!-- Step 7 -->
+  <rect x="591" y="233" width="78" height="68" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+  <circle cx="630" cy="248" r="10" fill="#64748b"/>
+  <text x="630" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">7</text>
+  <text x="630" y="271" text-anchor="middle" font-size="9" fill="#334155" font-weight="600">Set Env</text>
+  <text x="630" y="283" text-anchor="middle" font-size="9" fill="#334155">Vars</text>
+  <text x="630" y="295" text-anchor="middle" font-size="8" fill="#94a3b8">BASE_URL</text>
+
+  <line x1="669" y1="267" x2="681" y2="267" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#as)"/>
+
+  <!-- Step 8 (highlighted purple — Claude launch) -->
+  <rect x="681" y="233" width="78" height="68" rx="6" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
+  <circle cx="720" cy="248" r="10" fill="#7c3aed"/>
+  <text x="720" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">8</text>
+  <text x="720" y="271" text-anchor="middle" font-size="9" fill="#4c1d95" font-weight="600">Launch</text>
+  <text x="720" y="283" text-anchor="middle" font-size="9" fill="#4c1d95">Claude</text>
+  <text x="720" y="295" text-anchor="middle" font-size="8" fill="#7c3aed">CLI (claude)</text>
+
+  <line x1="759" y1="267" x2="771" y2="267" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#as)"/>
+
+  <!-- Step 9 (red — cleanup) -->
+  <rect x="771" y="233" width="78" height="68" rx="6" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+  <circle cx="810" cy="248" r="10" fill="#dc2626"/>
+  <text x="810" y="252" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">9</text>
+  <text x="810" y="271" text-anchor="middle" font-size="9" fill="#7f1d1d" font-weight="600">Cleanup</text>
+  <text x="810" y="283" text-anchor="middle" font-size="9" fill="#7f1d1d">On Exit</text>
+  <text x="810" y="295" text-anchor="middle" font-size="8" fill="#dc2626">SIGTERM proxy</text>
+
+  <line x1="20" y1="315" x2="880" y2="315" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- ═══════════════════════════ CONFIG FILES ═══════════════════════════ -->
+  <text x="26" y="332" font-size="10" font-weight="600" fill="#94a3b8" letter-spacing="1.5">CONFIGURATION  (~/.config/claude-connect-do/)</text>
+
+  <!-- 5 config boxes: each 162px wide, 12px gap, starting at x=20 -->
+  <rect x="20"  y="340" width="162" height="44" rx="5" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="32"  y="357" font-family="'Courier New', monospace" font-size="9" fill="#0f172a" font-weight="600">config.env</text>
+  <text x="32"  y="373" font-size="9" fill="#64748b">API key  (chmod 600)</text>
+
+  <rect x="194" y="340" width="162" height="44" rx="5" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="206" y="357" font-family="'Courier New', monospace" font-size="9" fill="#0f172a" font-weight="600">models_cache.json</text>
+  <text x="206" y="373" font-size="9" fill="#64748b">Live model list (24h TTL)</text>
+
+  <rect x="368" y="340" width="162" height="44" rx="5" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="380" y="357" font-family="'Courier New', monospace" font-size="9" fill="#0f172a" font-weight="600">litellm_config.yaml</text>
+  <text x="380" y="373" font-size="9" fill="#64748b">Auto-generated proxy config</text>
+
+  <rect x="542" y="340" width="162" height="44" rx="5" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="554" y="357" font-family="'Courier New', monospace" font-size="9" fill="#0f172a" font-weight="600">venv/</text>
+  <text x="554" y="373" font-size="9" fill="#64748b">Isolated LiteLLM virtualenv</text>
+
+  <rect x="716" y="340" width="164" height="44" rx="5" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="728" y="357" font-family="'Courier New', monospace" font-size="9" fill="#0f172a" font-weight="600">logs/ · instances/</text>
+  <text x="728" y="373" font-size="9" fill="#64748b">Proxy logs &amp; PID files</text>
+</svg>
