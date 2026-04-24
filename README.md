@@ -13,6 +13,8 @@
 
 Bridges [Claude Code](https://github.com/anthropics/claude-code)'s Anthropic API format to [DigitalOcean Gradient AI](https://www.digitalocean.com/products/gradient/platform)'s OpenAI-compatible endpoint via an automatically managed local [LiteLLM](https://github.com/BerriAI/litellm) proxy — zero manual configuration required.
 
+Current stable release: **v1.0.2**
+
 </div>
 
 ---
@@ -121,8 +123,8 @@ bash bin/claude-connect-do           # start a session
 
 ```bash
 cd /path/to/claude-connect
-npm pack                              # creates claude-connect-do-1.0.0.tgz
-npm install -g ./claude-connect-do-1.0.0.tgz
+npm pack                              # creates claude-connect-do-<version>.tgz
+npm install -g ./claude-connect-do-<version>.tgz
 claude-connect-do version
 ```
 

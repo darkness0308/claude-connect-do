@@ -11,7 +11,7 @@ $env:PYTHONUTF8 = "1"
 $env:PYTHONIOENCODING = "utf-8"
 $env:LC_ALL = "C.UTF-8"
 
-$VERSION = "1.0.0"
+$VERSION = "1.0.2"
 $CONFIG_DIR = Join-Path $HOME ".config/claude-connect-do"
 $CONFIG_FILE = Join-Path $CONFIG_DIR "config.env"
 $MODELS_CACHE = Join-Path $CONFIG_DIR "models_cache.json"
@@ -29,6 +29,8 @@ $LOCAL_BIN_DIR = Join-Path $HOME "bin"
 
 $script:ProxyProcess = $null
 $script:ProxyPort = $null
+$script:CleanupDone = $false
+$script:WatchdogProcess = $null
 
 function Die([string]$msg) {
   Write-Host "error: $msg" -ForegroundColor Red
@@ -509,10 +511,10 @@ function Start-Proxy([int]$port, [string]$apiKey) {
   if ($litellmMode -eq "wrapper") {
     $venvPy = Join-Path $VENV_DIR "Scripts/python.exe"
     $proxyArgs = @($LITELLM_WRAPPER, "--config", $LITELLM_CONFIG, "--host", "127.0.0.1", "--port", "$port")
-    $p = Start-Process -FilePath $venvPy -ArgumentList $proxyArgs -RedirectStandardOutput $logOut -RedirectStandardError $logErr -PassThru
+    $p = Start-Process -FilePath $venvPy -ArgumentList $proxyArgs -RedirectStandardOutput $logOut -RedirectStandardError $logErr -NoNewWindow -PassThru
   } else {
     $proxyArgs = @("--config", $LITELLM_CONFIG, "--host", "127.0.0.1", "--port", "$port")
-    $p = Start-Process -FilePath $litellmMode -ArgumentList $proxyArgs -RedirectStandardOutput $logOut -RedirectStandardError $logErr -PassThru
+    $p = Start-Process -FilePath $litellmMode -ArgumentList $proxyArgs -RedirectStandardOutput $logOut -RedirectStandardError $logErr -NoNewWindow -PassThru
   }
 
   $script:ProxyProcess = $p
@@ -551,6 +553,14 @@ function Wait-ForProxy([int]$port) {
 }
 
 function Cleanup {
+  if ($script:CleanupDone) { return }
+  $script:CleanupDone = $true
+
+  # Stop the watchdog first so it doesn't race with cleanup
+  if ($script:WatchdogProcess -and -not $script:WatchdogProcess.HasExited) {
+    try { Stop-Process -Id $script:WatchdogProcess.Id -Force -ErrorAction SilentlyContinue } catch { }
+  }
+
   if ($script:ProxyProcess) {
     try {
       if (-not $script:ProxyProcess.HasExited) {
@@ -827,41 +837,85 @@ function Cmd-Help {
 claude-connect-do v$VERSION - Claude Code via DigitalOcean Gradient AI
 
 Usage:
-  claude-connect-do                    Start interactive Claude session via DO
-  claude-connect-do <claude args>      Pass arguments to claude (e.g. claude-connect-do -p "hello")
-  claude-connect-do install            Install claude-connect-do to ~/bin and configure user PATH
-  claude-connect-do setup              Configure API key and discover models
-  claude-connect-do doctor             Validate dependencies and print fix commands
-  claude-connect-do status             Show running proxy instances
-  claude-connect-do stop-all           Kill all running proxy instances
-  claude-connect-do models             Show discovered model mappings
-  claude-connect-do version            Show version
-  claude-connect-do help               Show this help
+  claude-connect-do [claude args...]   Start Claude via DO (all Claude flags pass through)
+  claude-connect-do <wrapper cmd>      Run a wrapper command (see list below)
+  claude-connect-do -- <claude args>   Force everything after -- to pass through to claude
+
+Wrapper commands:
+  install  | cc-install      Install claude-connect-do to ~/bin and configure user PATH
+  setup    | cc-setup        Configure API key and discover models
+  doctor   | cc-doctor       Validate dependencies and print fix commands
+  status   | cc-status       Show running proxy instances
+  stop-all | cc-stop-all     Kill all running proxy instances
+  models   | cc-models       Show discovered model mappings
+  version  | cc-version      Show wrapper version
+  help     | cc-help         Show this help
+
+Passthrough to Claude:
+  Any flag/command not listed above is forwarded to the underlying ``claude`` CLI.
+  All Claude flags work: --dangerously-skip-permissions, --model, --permission-mode,
+  --add-dir, --agents, --mcp-config, -c, -r, -p, --print, --verbose, etc.
+  Claude subcommands also pass through: auth, mcp, agents, plugin, update, setup-token, ...
+
+Colliding subcommands (3 names mean different things in the wrapper vs. Claude):
+  install, doctor, help  -  by default these run the WRAPPER's version.
+  To reach Claude's version of these, use one of:
+    claude-connect-do -- doctor            # runs ``claude doctor`` via DO
+    claude-connect-do -- install stable    # runs ``claude install stable`` via DO
+    claude-connect-do -- --help            # shows Claude's help
 
 Examples:
-  claude-connect-do install
-  claude-connect-do doctor
-  claude-connect-do setup
-  claude-connect-do
-  claude-connect-do --model claude-sonnet-4-6 -p "hello"
+  claude-connect-do setup                               First-time setup
+  claude-connect-do                                     Interactive Claude session via DO
+  claude-connect-do --dangerously-skip-permissions      Skip all permission prompts
+  claude-connect-do --model claude-sonnet-4-6 -p "hi"   One-shot prompt with model
+  claude-connect-do -c                                  Continue most recent conversation
+  claude-connect-do --add-dir ./src --permission-mode acceptEdits
+  claude-connect-do -- doctor                           Claude's doctor (not the wrapper's)
+  claude-connect-do cc-doctor                           Wrapper's doctor (unambiguous)
 "@ | Write-Host
 }
 
 function Main {
   Ensure-Dirs
 
-  if ($args.Count -gt 0) {
+  # Everything after `--` is forwarded verbatim to claude. Use this to pass
+  # colliding subcommands (install/doctor/help) through to Claude.
+  # Example: claude-connect-do -- doctor        # runs `claude doctor`
+  # Example: claude-connect-do -- --help        # runs `claude --help`
+  $claudeArgs = @($args)
+  $skipDispatch = $false
+  if ($args.Count -gt 0 -and $args[0] -eq "--") {
+    $skipDispatch = $true
+    if ($args.Count -gt 1) {
+      $claudeArgs = @($args[1..($args.Count - 1)])
+    } else {
+      $claudeArgs = @()
+    }
+  }
+
+  if (-not $skipDispatch -and $args.Count -gt 0) {
+    # `cc-*` aliases are provided for every wrapper command so users can invoke
+    # them unambiguously even if Claude adds new colliding subcommands.
     switch ($args[0]) {
-      "install" { Cmd-Install; return }
-      "setup" { Cmd-Setup; return }
-      "doctor" { Cmd-Doctor; return }
-      "status" { Cmd-Status; return }
-      "stop-all" { Cmd-StopAll; return }
-      "models" { Cmd-Models; return }
-      "version" { Cmd-Version; return }
-      "help" { Cmd-Help; return }
-      "--help" { Cmd-Help; return }
-      "-h" { Cmd-Help; return }
+      "install"      { Cmd-Install; return }
+      "cc-install"   { Cmd-Install; return }
+      "setup"        { Cmd-Setup; return }
+      "cc-setup"     { Cmd-Setup; return }
+      "doctor"       { Cmd-Doctor; return }
+      "cc-doctor"    { Cmd-Doctor; return }
+      "status"       { Cmd-Status; return }
+      "cc-status"    { Cmd-Status; return }
+      "stop-all"     { Cmd-StopAll; return }
+      "cc-stop-all"  { Cmd-StopAll; return }
+      "models"       { Cmd-Models; return }
+      "cc-models"    { Cmd-Models; return }
+      "version"      { Cmd-Version; return }
+      "cc-version"   { Cmd-Version; return }
+      "cc-help"      { Cmd-Help; return }
+      "help"         { Cmd-Help; return }
+      "--help"       { Cmd-Help; return }
+      "-h"           { Cmd-Help; return }
     }
   }
 
@@ -887,6 +941,29 @@ function Main {
 
   try {
     Start-Proxy -port $port -apiKey $apiKey
+
+    # Detached watchdog process: survives even taskkill /F on this PowerShell.
+    # Monitors this PID and kills the proxy if this process disappears.
+    $parentPid = $PID
+    $proxyPid  = $script:ProxyProcess.Id
+    $watchdogScript = @"
+while (`$true) {
+  Start-Sleep -Seconds 2
+  try {
+    `$p = Get-Process -Id $parentPid -ErrorAction Stop
+  } catch {
+    # Parent gone — kill proxy
+    try { Stop-Process -Id $proxyPid -Force -ErrorAction SilentlyContinue } catch { }
+    break
+  }
+}
+"@
+    $encodedCmd = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($watchdogScript))
+    $script:WatchdogProcess = Start-Process -FilePath "powershell" `
+      -ArgumentList "-NoLogo", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden",
+                    "-EncodedCommand", $encodedCmd `
+      -PassThru -WindowStyle Hidden
+
     Wait-ForProxy -port $port
 
     Info "Launching Claude Code via DO Gradient AI (port $port)..."
@@ -894,7 +971,7 @@ function Main {
     $env:ANTHROPIC_AUTH_TOKEN = $PROXY_MASTER_KEY
     $env:DO_GRADIENT_API_KEY = $apiKey
 
-    & claude @args
+    & claude @claudeArgs
     exit $LASTEXITCODE
   } finally {
     Cleanup
